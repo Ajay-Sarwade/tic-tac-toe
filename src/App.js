@@ -6,53 +6,75 @@ function App() {
   const [board, setBoard] = useState(initialBoard());
   const [turn, setTurn] = useState("X");
   const [win, setWin] = useState(getWinsArray());
+  const [winner, setWinner] = useState("");
 
   function initialBoard() {
     return new Array(size * size).fill(null);
   }
 
   function getWinsArray() {
-    let a = [],
-      temp = [],win=[];
+    let win = [];
     let i, j;
-    for (i = 0; i < size * size; i++) {
-      temp.push(i);
-      if (temp.length == size) {
-        a.push(temp);
-        temp = [];
+    for (i = 0; i < size; i++) {
+      let harr = [];
+      let varr = [];
+      for (j = 0; j < size; j++) {
+        harr.push(i * size + j);
+        varr.push(j * size + i);
+      }
+      win.push(harr);
+      win.push(varr);
+    }
+
+    let d1 = [],
+      d2 = [];
+
+    for (i = 0; i < size; i++) {
+      d1.push(i * size + i);
+      d2.push(i * size + (size - i - 1));
+    }
+    win.push(d1, d2);
+
+    return win;
+  }
+
+  function checkWinner() {
+    let i, j;
+    for (i = 0; i < win.length; i++) {
+      let arr = win[i];
+      let cx = 0,
+        co = 0;
+      for (j = 0; j < arr.length; j++) {
+        if (board[arr[j]] == "X") cx++;
+        if (board[arr[j]] == "O") co++;
+      }
+      if (cx == size) {
+        setWinner("X");
+        return;
+      }
+      if (co == size) {
+        setWinner("O");
+        return;
       }
     }
-
-  for(i=0;i<size;i++){
-    for(j=0;j<size;j++){
-     temp.push(a[i][j]);
-     if(temp.length==size){
-      win.push(temp);temp=[];
-     }
-    }
-  }
-  temp=[];
-
-  for(i=0;i<size;i++){
-    for(j=0;j<size;j++){
-    if(i>=j){
-      
-    }
-    }
-  }
-
-
-
-
   }
 
   const handleClick = (index) => {
+    if (winner) return;
     if (board[index] == null) {
       board[index] = turn;
       setTurn((prev) => {
         return prev == "X" ? "O" : "X";
       });
     }
+
+    checkWinner();
+  };
+
+  const resetGame = () => {
+    setBoard(initialBoard());
+    setWinner("");
+    setTurn("X");
   };
 
   return (
@@ -60,8 +82,8 @@ function App() {
       <h1>Tic-Tac-Toe</h1>
       <div className="status">
         <div className="statusContent">
-          <p>Player {turn} turn</p>
-          <button>Reset game</button>
+          {winner ? <p>Player {winner} wins</p> : <p>Player {turn} turn</p>}
+          <button onClick={(e) => resetGame()}>Reset game</button>
         </div>
       </div>
 
